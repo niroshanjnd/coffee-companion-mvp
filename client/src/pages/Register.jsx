@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
-  const [suburbs, setSuburbs] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,27 +10,40 @@ const Register = () => {
     suburb: '',
   });
 
-  useEffect(() => {
-  const fetchSuburbs = async () => {
-    try {
-      const res = await axios.get('https://queensland.opendatasoft.com/api/records/1.0/search/?dataset=queensland-suburbs&rows=1000');
-      const records = res.data.records;
-      const uniqueSuburbs = Array.from(new Set(records.map(r => r.fields.suburb.trim()))).sort();
-      setSuburbs(uniqueSuburbs);
-    } catch (err) {
-      console.error('Error loading suburbs:', err);
-    }
-  };
-
-  fetchSuburbs();
-}, []);
-
+  const [suggestions, setSuggestions] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const fetchSuburbs = async (input) => {
+    if (!input || input.length < 3) return;
+    try {
+      const res = await axios.get('https://api.addressfinder.io/api/au/location/autocomplete', {
+        params: {
+          key: 'LY9F6XD7MUTJ43GNRHEQ', // replace this with your AddressFinder key
+          q: input,
+          state: 'QLD',
+          type: 'locality',
+        },
+      });
+      const suburbs = res.data.completions
+      .filter(c => c.full_location.includes('QLD'))  // Optional: only show QLD suburbs
+      .map(c => c.full_location);
+      setSuggestions(suburbs);
+    } catch (err) {
+      console.error('Error fetching suburb suggestions:', err);
+    }
+  };
+
   const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'suburb') fetchSuburbs(value);
+  };
+
+  const handleSelectSuggestion = (suburb) => {
+    setFormData(prev => ({ ...prev, suburb }));
+    setSuggestions([]);
   };
 
   const handleSubmit = async e => {
@@ -41,7 +53,6 @@ const Register = () => {
       setFormData({ name: '', email: '', password: '', suburb: '' });
       setError('');
       setShowPopup(true);
-
       setTimeout(() => {
         setShowPopup(false);
         navigate('/login');
@@ -64,47 +75,34 @@ const Register = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4 pt-12">
-        <input
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-2 border"
-          required
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 border"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 border"
-          required
-        />
+        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} className="w-full p-2 border" required />
+        <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} className="w-full p-2 border" required />
+        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} className="w-full p-2 border" required />
 
-        <select
-          name="suburb"
-          value={formData.suburb}
-          onChange={handleChange}
-          className="w-full p-2 border"
-          required
-        >
-          <option value="">Select a suburb</option>
-          {suburbs.map((suburb, idx) => (
-            <option key={idx} value={suburb}>
-              {suburb}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <input
+            name="suburb"
+            placeholder="Suburb"
+            value={formData.suburb}
+            onChange={handleChange}
+            className="w-full p-2 border"
+            required
+            autoComplete="off"
+          />
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 bg-white border w-full max-h-40 overflow-y-auto">
+              {suggestions.map((suburb, idx) => (
+                <li
+                  key={idx}
+                  onClick={() => handleSelectSuggestion(suburb)}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                >
+                  {suburb}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         <button type="submit" className="w-full bg-blue-500 text-white p-2">
           Register
