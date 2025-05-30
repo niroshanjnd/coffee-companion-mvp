@@ -1,29 +1,20 @@
+// client/src/pages/Landing.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from "../assets/logo.png";
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4">
-      <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
-        ☕ Welcome to Coffee Companion
-      </h1>
-      <p className="text-lg text-gray-600 mb-10 text-center max-w-md">
-        Connect with like-minded people in your area for a warm coffee and good conversation.
-      </p>
-      <div className="flex gap-6">
-        <Link
-          to="/login"
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded text-lg"
-        >
-          Login
-        </Link>
-        <Link
-          to="/register"
-          className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded text-lg"
-        >
-          Register
-        </Link>
-      </div>
+    <div className="min-h-screen flex flex-col justify-center items-center bg-[#fefaf6] px-4 text-[#0a2342]">
+      <img src={logo} alt="Coffee Companion Logo" className="w-20 mb-4" />
+      <h1 className="text-2xl font-bold text-center mb-2">Find Coffee Companions Nearby</h1>
+      <Link to="/register" className="bg-[#f97316] text-white text-lg rounded-md w-full max-w-xs py-3 text-center mb-3 shadow">
+        Register
+      </Link>
+      <Link to="/login" className="border border-[#0a2342] text-[#0a2342] text-lg rounded-md w-full max-w-xs py-3 text-center shadow">
+        Login
+      </Link>
+      <img src="/map-icon.png" alt="Map Icon" className="w-24 mt-6" />
     </div>
   );
 };
