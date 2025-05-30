@@ -6,14 +6,8 @@ const MyProfile = () => {
   const [user, setUser] = useState(null);
   const [localUsers, setLocalUsers] = useState([]);
   const [coffeeShops, setCoffeeShops] = useState([]);
-
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -23,7 +17,7 @@ const MyProfile = () => {
         });
         setUser(res.data);
       } catch (err) {
-        console.error('Error fetching current user', err);
+        console.error('Error fetching current user:', err);
       }
     };
 
@@ -37,11 +31,13 @@ const MyProfile = () => {
       });
       setLocalUsers(res.data);
     } catch (err) {
-      console.error('Error loading users by location', err);
+      console.error('Error loading users by location:', err);
     }
   };
 
-  const handleLoadCoffeeShops = async () => {
+  const handleLoadCoffeeShops = () => {
+    if (!user || !user.suburb) return;
+
     const dummyShops = [
       { name: 'The Daily Grind', address: `${user.suburb} Central` },
       { name: 'Brew Haven', address: `${user.suburb} Plaza` },
@@ -50,64 +46,64 @@ const MyProfile = () => {
     setCoffeeShops(dummyShops);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   if (!user) return <p className="text-center mt-10">Loading profile...</p>;
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 px-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Welcome, {user.name}</h2>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Logout
-        </button>
-      </div>
-      <p className="text-gray-600 mb-6">Suburb: {user.suburb}</p>
+    <div className="min-h-screen flex flex-col items-center bg-[#fefaf6] px-4 text-[#0a2342]">
+      <div className="max-w-3xl w-full mt-10 px-4">
+        <h2 className="text-2xl font-bold mb-2">Welcome, {user.name}</h2>
+        <p className="text-gray-600 mb-6">Suburb: {user.suburb}</p>
 
-      <div className="space-x-4 mb-6">
-        <button
-          onClick={handleLoadCoffeeShops}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
-        >
-          Find Nearby Coffee Shops
-        </button>
-
-        <button
-          onClick={handleLoadLocalUsers}
-          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
-        >
-          Find People in My Suburb
-        </button>
-      </div>
-
-      {coffeeShops.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Coffee Shops</h3>
-          <ul className="space-y-2">
-            {coffeeShops.map((shop, idx) => (
-              <li key={idx} className="border p-2 rounded">
-                <strong>{shop.name}</strong><br />
-                {shop.address}
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-4 w-full max-w-xs">
+          <button onClick={handleLoadCoffeeShops} className="w-full bg-[#f97316] text-white py-3 rounded-md">
+            Find Nearby Coffee Shops
+          </button>
+          <button onClick={handleLoadLocalUsers} className="w-full bg-[#0a2342] text-white py-3 rounded-md">
+            Find People in My Suburb
+          </button>
+          <button className="w-full border border-[#0a2342] text-[#0a2342] py-3 rounded-md">
+            Verify Yourself
+          </button>
+          <button onClick={handleLogout} className="w-full border border-gray-400 text-gray-600 py-3 rounded-md">
+            Logout
+          </button>
         </div>
-      )}
 
-      {localUsers.length > 0 && (
-        <div>
-          <h3 className="text-xl font-semibold mb-2">People Near You</h3>
-          <ul className="space-y-2">
-            {localUsers.map(user => (
-              <li key={user.id} className="border p-2 rounded">
-                <strong>{user.name}</strong><br />
-                {user.email}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* ✅ Coffee Shops List */}
+        {coffeeShops.length > 0 && (
+          <div className="my-6">
+            <h3 className="text-xl font-semibold mb-2">Coffee Shops</h3>
+            <ul className="space-y-2">
+              {coffeeShops.map((shop, idx) => (
+                <li key={idx} className="border p-2 rounded">
+                  <strong>{shop.name}</strong><br />
+                  {shop.address}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ✅ Local Users List */}
+        {localUsers.length > 0 && (
+          <div className="my-6">
+            <h3 className="text-xl font-semibold mb-2">People Near You</h3>
+            <ul className="space-y-2">
+              {localUsers.map((user) => (
+                <li key={user.id} className="border p-2 rounded">
+                  <strong>{user.name}</strong><br />
+                  {user.email}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

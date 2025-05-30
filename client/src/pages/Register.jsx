@@ -1,114 +1,57 @@
-import React, { useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    suburb: '',
-  });
-
-  const [suggestions, setSuggestions] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
-  const [error, setError] = useState('');
+  const suburbRef = useRef(null);
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', suburb: '' });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const fetchSuburbs = async (input) => {
-    if (!input || input.length < 3) return;
-    try {
-      const res = await axios.get('https://api.addressfinder.io/api/au/location/autocomplete', {
-        params: {
-          key: 'LY9F6XD7MUTJ43GNRHEQ', // replace this with your AddressFinder key
-          q: input,
-          state: 'QLD',
-          type: 'locality',
-        },
-      });
-      const suburbs = res.data.completions
-      .filter(c => c.full_location.includes('QLD'))  // Optional: only show QLD suburbs
-      .map(c => c.full_location);
-      setSuggestions(suburbs);
-    } catch (err) {
-      console.error('Error fetching suburb suggestions:', err);
-    }
-  };
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://api.addressfinder.io/assets/v3/widget.js';
+    script.onload = () => {
+      if (window.AddressFinder) {
+        const widget = new window.AddressFinder.Widget(suburbRef.current, 'YOUR_API_KEY', 'AU');
+        widget.on('result:select', (full, meta) => {
+          setFormData(prev => ({ ...prev, suburb: meta.locality_name }));
+        });
+      }
+    };
+    document.body.appendChild(script);
+  }, []);
 
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (name === 'suburb') fetchSuburbs(value);
-  };
-
-  const handleSelectSuggestion = (suburb) => {
-    setFormData(prev => ({ ...prev, suburb }));
-    setSuggestions([]);
-  };
+  const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
     try {
       await axios.post('http://localhost:5050/api/auth/register', formData);
-      setFormData({ name: '', email: '', password: '', suburb: '' });
+      setSuccess(true);
       setError('');
-      setShowPopup(true);
+      setFormData({ name: '', email: '', password: '', suburb: '' });
       setTimeout(() => {
-        setShowPopup(false);
         navigate('/login');
-      }, 5000);
+      }, 2000);
     } catch (err) {
-      console.error(err);
-      setError('Registration failed. Please try again.');
-      setShowPopup(false);
+      setError('Registration failed');
+      setSuccess(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 relative">
-      <h2 className="text-xl font-bold mb-4">Register</h2>
-
-      {showPopup && (
-        <div className="absolute top-0 left-0 right-0 bg-green-500 text-white text-center py-2 rounded shadow-lg z-10">
-          ✅ Registration successful! Redirecting to login...
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4 pt-12">
-        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} className="w-full p-2 border" required />
-        <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} className="w-full p-2 border" required />
-        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} className="w-full p-2 border" required />
-
-        <div className="relative">
-          <input
-            name="suburb"
-            placeholder="Suburb"
-            value={formData.suburb}
-            onChange={handleChange}
-            className="w-full p-2 border"
-            required
-            autoComplete="off"
-          />
-          {suggestions.length > 0 && (
-            <ul className="absolute z-10 bg-white border w-full max-h-40 overflow-y-auto">
-              {suggestions.map((suburb, idx) => (
-                <li
-                  key={idx}
-                  onClick={() => handleSelectSuggestion(suburb)}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  {suburb}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <button type="submit" className="w-full bg-blue-500 text-white p-2">
-          Register
-        </button>
+    <div className="min-h-screen flex flex-col justify-center items-center bg-[#fefaf6] text-[#0a2342] px-4">
+      <h2 className="text-2xl font-bold mb-6">Register</h2>
+      <form onSubmit={handleSubmit} className="w-full max-w-xs space-y-4">
+        <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" className="w-full p-3 rounded border border-gray-300" required />
+        <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" type="email" className="w-full p-3 rounded border border-gray-300" required />
+        <input name="password" value={formData.password} onChange={handleChange} placeholder="Password" type="password" className="w-full p-3 rounded border border-gray-300" required />
+        <input ref={suburbRef} placeholder="Suburb" className="w-full p-3 rounded border border-gray-300" required />
+        <button type="submit" className="w-full bg-[#f97316] text-white py-3 rounded-md font-semibold">Register</button>
       </form>
-
+      {success && <p className="text-green-600 mt-4">✅ Registered! Redirecting...</p>}
       {error && <p className="text-red-600 mt-4">{error}</p>}
     </div>
   );
