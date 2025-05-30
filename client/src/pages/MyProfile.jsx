@@ -6,6 +6,9 @@ const MyProfile = () => {
   const [user, setUser] = useState(null);
   const [localUsers, setLocalUsers] = useState([]);
   const [coffeeShops, setCoffeeShops] = useState([]);
+  const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [documentId, setDocumentId] = useState('');
+  const [documentFile, setDocumentFile] = useState(null);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
@@ -36,7 +39,7 @@ const MyProfile = () => {
   };
 
   const handleLoadCoffeeShops = () => {
-    if (!user || !user.suburb) return;
+    if (!user?.suburb) return;
 
     const dummyShops = [
       { name: 'The Daily Grind', address: `${user.suburb} Central` },
@@ -49,6 +52,31 @@ const MyProfile = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
+  };
+
+  const handleVerifySubmit = async (e) => {
+    e.preventDefault();
+
+    // For MVP, log the values or send to backend via POST
+    const formData = new FormData();
+    formData.append('documentId', documentId);
+    if (documentFile) formData.append('documentFile', documentFile);
+
+    try {
+      const res = await axios.post('http://localhost:5050/api/users/verify', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      alert('Verification submitted successfully!');
+      setShowVerificationForm(false);
+      setDocumentId('');
+      setDocumentFile(null);
+    } catch (err) {
+      console.error('Verification failed:', err);
+      alert('Verification failed.');
+    }
   };
 
   if (!user) return <p className="text-center mt-10">Loading profile...</p>;
@@ -66,7 +94,10 @@ const MyProfile = () => {
           <button onClick={handleLoadLocalUsers} className="w-full bg-[#0a2342] text-white py-3 rounded-md">
             Find People in My Suburb
           </button>
-          <button className="w-full border border-[#0a2342] text-[#0a2342] py-3 rounded-md">
+          <button
+            onClick={() => setShowVerificationForm(!showVerificationForm)}
+            className="w-full border border-[#0a2342] text-[#0a2342] py-3 rounded-md"
+          >
             Verify Yourself
           </button>
           <button onClick={handleLogout} className="w-full border border-gray-400 text-gray-600 py-3 rounded-md">
@@ -74,7 +105,30 @@ const MyProfile = () => {
           </button>
         </div>
 
-        {/* ✅ Coffee Shops List */}
+        {/* ✅ Verification Form */}
+        {showVerificationForm && (
+          <form onSubmit={handleVerifySubmit} className="bg-white shadow-md mt-6 p-4 rounded-md border">
+            <h3 className="text-lg font-semibold mb-3">Enter ID Details</h3>
+            <input
+              type="text"
+              value={documentId}
+              onChange={(e) => setDocumentId(e.target.value)}
+              placeholder="Document ID Number"
+              required
+              className="w-full border p-2 rounded mb-3"
+            />
+            <input
+              type="file"
+              onChange={(e) => setDocumentFile(e.target.files[0])}
+              className="w-full mb-3"
+            />
+            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded w-full">
+              Submit Verification
+            </button>
+          </form>
+        )}
+
+        {/* ✅ Coffee Shops */}
         {coffeeShops.length > 0 && (
           <div className="my-6">
             <h3 className="text-xl font-semibold mb-2">Coffee Shops</h3>
@@ -89,7 +143,7 @@ const MyProfile = () => {
           </div>
         )}
 
-        {/* ✅ Local Users List */}
+        {/* ✅ Local Users */}
         {localUsers.length > 0 && (
           <div className="my-6">
             <h3 className="text-xl font-semibold mb-2">People Near You</h3>
