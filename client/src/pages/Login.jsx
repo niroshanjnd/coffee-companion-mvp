@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-[#fefaf6] text-[#0a2342] px-4">
+         <img src={logo} alt="Coffee Companion Logo" className="w-32 h-32 mb-6" />
       <h2 className="text-2xl font-bold mb-6">Login</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xs space-y-4">
         <input
