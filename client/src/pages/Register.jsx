@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const Register = () => {
   const suburbRef = useRef(null);
@@ -43,6 +44,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-[#fefaf6] text-[#0a2342] px-4">
+       <img src={logo} alt="Coffee Companion Logo" className="w-32 h-32 mb-6" />
       <h2 className="text-2xl font-bold mb-6">Register</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xs space-y-4">
         <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" className="w-full p-3 rounded border border-gray-300" required />

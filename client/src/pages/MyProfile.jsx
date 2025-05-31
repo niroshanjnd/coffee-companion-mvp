@@ -51,15 +51,33 @@ const MyProfile = () => {
     }
   };
 
-  const handleLoadCoffeeShops = () => {
-    if (!user) return;
-    const dummyShops = [
-      { name: 'The Daily Grind', address: `${user.suburb} Central` },
-      { name: 'Brew Haven', address: `${user.suburb} Plaza` },
-      { name: 'Espresso Corner', address: `${user.suburb} Mall` }
-    ];
-    setCoffeeShops(dummyShops);
-  };
+ const handleLoadCoffeeShops = () => {
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        const res = await axios.get('http://localhost:5050/api/coffee-shops', {
+          params: {
+            suburb: user.suburb,
+            lat: latitude,
+            lng: longitude
+          }
+        });
+
+        setCoffeeShops(res.data);
+      } catch (err) {
+        console.error('Error fetching coffee shops:', err);
+        alert('Failed to fetch coffee shops.');
+      }
+    },
+    (error) => {
+      console.error("Geolocation error:", error);
+      alert("Location access is required to find nearby coffee shops.");
+    }
+  );
+};
+
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -127,18 +145,21 @@ const MyProfile = () => {
         )}
 
         {coffeeShops.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-semibold mb-2">Coffee Shops</h3>
-            <ul className="space-y-2">
-              {coffeeShops.map((shop, idx) => (
-                <li key={idx} className="border p-2 rounded">
-                  <strong>{shop.name}</strong><br />
-                  {shop.address}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+  <div className="mb-6">
+    <h3 className="text-xl font-semibold mb-2">Coffee Shops</h3>
+    <ul className="space-y-2">
+      {coffeeShops.map((shop, idx) => (
+        <li key={idx} className="border p-2 rounded">
+          <strong>{shop.name}</strong><br />
+          {shop.address}<br />
+          📍 {shop.distance} km away<br />
+          🕒 {shop.openingHours?.[0] || 'Hours not available'}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
 
         {localUsers.length > 0 && (
           <div>
