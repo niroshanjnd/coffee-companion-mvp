@@ -53,6 +53,11 @@ const Register = () => {
         <input ref={suburbRef} placeholder="Suburb" className="w-full p-3 rounded border border-gray-300" required />
         <button type="submit" className="w-full bg-[#f97316] text-white py-3 rounded-md font-semibold">Register</button>
       </form>
+      <div className="mt-4 text-center"><p className="text-sm text-gray-600">Already have an account?
+        <a href="/login" className="ml-2 text-blue-600 hover:underline">Log in</a></p>
+        </div>
+
+
       {success && <p className="text-green-600 mt-4">✅ Registered! Redirecting...</p>}
       {error && <p className="text-red-600 mt-4">{error}</p>}
     </div>

@@ -50,6 +50,11 @@ const Login = () => {
         <button type="submit" className="w-full bg-[#0a2342] text-white py-3 rounded-md font-semibold">
           Login
         </button>
+        <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">Don't have an account?<a href="/register" 
+        className="ml-2 text-blue-600 hover:underline">
+            Register</a></p>
+        </div>
       </form>
       {error && <p className="mt-4 text-red-600">{error}</p>}
     </div>
