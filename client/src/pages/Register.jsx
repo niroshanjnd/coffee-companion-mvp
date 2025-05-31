@@ -14,7 +14,7 @@ const Register = () => {
     script.src = 'https://api.addressfinder.io/assets/v3/widget.js';
     script.onload = () => {
       if (window.AddressFinder) {
-        const widget = new window.AddressFinder.Widget(suburbRef.current, 'YOUR_API_KEY', 'AU');
+        const widget = new window.AddressFinder.Widget(suburbRef.current, 'LY9F6XD7MUTJ43GNRHEQ', 'AU');
         widget.on('result:select', (full, meta) => {
           setFormData(prev => ({ ...prev, suburb: meta.locality_name }));
         });

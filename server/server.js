@@ -1,23 +1,37 @@
+// server/server.js
 import express from 'express';
-import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import usersRoutes from './routes/users.js';
-import userRoutes from './routes/users.js';
 import cors from 'cors';
-
-dotenv.config();
+import path from 'path';
+import fs from 'fs';
+import usersRoutes from './routes/users.js';
+import verificationRoutes from './routes/verification.js'; // ✅ Import this correctly
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import authRoutes from './routes/auth.js';
 
 const app = express();
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
+// Required to use __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Middleware
+app.use(cors());
 app.use(express.json());
+
+// Ensure uploads folder exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+app.use('/uploads', express.static(uploadsDir)); // To serve uploaded files
+
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/verification', verificationRoutes); // ✅ Route correctly registered
 
-app.listen(5050, () => {
-  console.log('Server running on http://localhost:5050');
+const PORT = process.env.PORT || 5050;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
