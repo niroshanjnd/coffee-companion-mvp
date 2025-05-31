@@ -6,7 +6,7 @@ import logo from '../assets/logo.png';
 const Register = () => {
   const suburbRef = useRef(null);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', suburb: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', suburb: '', mobile: '', preferences: '', age_category: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -26,21 +26,36 @@ const Register = () => {
 
   const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-      await axios.post('http://localhost:5050/api/auth/register', formData);
-      setSuccess(true);
-      setError('');
-      setFormData({ name: '', email: '', password: '', suburb: '' });
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (err) {
-      setError('Registration failed');
-      setSuccess(false);
+ const handleSubmit = async e => {
+  e.preventDefault();
+  try {
+    await axios.post('http://localhost:5050/api/auth/register', formData);
+    setSuccess(true);
+    setError('');
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      suburb: '',
+      mobile: '',
+      preferences: '',
+      age_category: ''
+    });
+
+    // Clear AddressFinder input manually if used
+    if (suburbRef?.current) {
+      suburbRef.current.value = '';
     }
-  };
+
+    setTimeout(() => {
+      navigate('/login');
+    }, 2000);
+  } catch (err) {
+    setError('Registration failed');
+    setSuccess(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-[#fefaf6] text-[#0a2342] px-4">
@@ -50,7 +65,28 @@ const Register = () => {
         <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" className="w-full p-3 rounded border border-gray-300" required />
         <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" type="email" className="w-full p-3 rounded border border-gray-300" required />
         <input name="password" value={formData.password} onChange={handleChange} placeholder="Password" type="password" className="w-full p-3 rounded border border-gray-300" required />
-        <input ref={suburbRef} placeholder="Suburb" className="w-full p-3 rounded border border-gray-300" required />
+        <input name='suburb' ref={suburbRef} placeholder="Suburb" className="w-full p-3 rounded border border-gray-300" required />
+        <input type="text" name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} className="w-full p-2 border rounded" required/>
+        <input type="text" name="preferences" placeholder="Your interests (e.g., cycling, cat person)" value={formData.preferences} onChange={handleChange} className="w-full p-2 border rounded"/>
+        <select name="age_category" value={formData.age_category} onChange={handleChange} className="w-full p-2 border rounded" required>
+          <option value="">Select age range</option>
+          <option value="18-22">18–22</option>
+          <option value="23-27">23–27</option>
+          <option value="28-32">28–32</option>
+          <option value="33-37">33–37</option>
+          <option value="38-42">38–42</option>
+          <option value="43-47">43–47</option>
+          <option value="48-52">48–52</option>
+          <option value="53-57">53–57</option>
+          <option value="58-62">58–62</option>
+          <option value="63-67">63–67</option>
+          <option value="68-72">68–72</option>
+          <option value="73-77">73–77</option>
+          <option value="78-82">78–82</option>
+          <option value="83-87">83–87</option>
+          <option value="88-92">88–92</option>
+          <option value="90+">90+</option>
+        </select>
         <button type="submit" className="w-full bg-[#f97316] text-white py-3 rounded-md font-semibold">Register</button>
       </form>
       <div className="mt-4 text-center"><p className="text-sm text-gray-600">Already have an account?
