@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const MyProfile = () => {
   const [user, setUser] = useState(null);
@@ -9,35 +10,40 @@ const MyProfile = () => {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
 
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     const fetchCurrentUser = async () => {
       try {
         const res = await axios.get('http://localhost:5050/api/users/me', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
       } catch (err) {
         console.error('Error fetching current user:', err);
+        navigate('/login');
       }
     };
 
     const fetchStatus = async () => {
       try {
         const res = await axios.get('http://localhost:5050/api/verification/status', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setVerificationStatus(res.data.status || 'Not uploaded');
+        setVerificationStatus(res.data.status);
       } catch (err) {
-        console.error('Status fetch error:', err);
+        console.error('Status fetch error', err);
       }
     };
 
-    if (token) {
-      fetchCurrentUser();
-      fetchStatus();
-    }
-  }, [token]);
+    fetchCurrentUser();
+    fetchStatus();
+  }, [token, navigate]);
 
   const handleLoadLocalUsers = async () => {
     if (!user) return;
