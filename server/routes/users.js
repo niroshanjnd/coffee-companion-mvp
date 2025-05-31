@@ -1,8 +1,11 @@
 import express from 'express';
 import db from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import multer from 'multer';
+import path from 'path';
 
 const router = express.Router();
+
 
 // Get current logged-in user
 router.get('/me', authenticateToken, async (req, res) => {
@@ -46,6 +49,30 @@ router.get('/', authenticateToken, async (req, res) => {
     console.error('Error fetching users:', err);
     res.status(500).json({ error: 'Failed to fetch users' });
   }
+});
+
+// Setup multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Make sure this folder exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
+
+// POST /api/users/verify
+router.post('/verify', authenticateToken, upload.single('documentFile'), async (req, res) => {
+  const userId = req.user.userId;
+  const documentId = req.body.documentId;
+  const documentPath = req.file ? req.file.path : null;
+
+  console.log('🪪 Verification received:', { userId, documentId, documentPath });
+
+  // TODO: Save to DB and mark user as pending verification
+
+  return res.status(200).json({ message: 'Verification submitted' });
 });
 
 export default router;
