@@ -12,7 +12,7 @@ router.get('/me', authenticateToken, async (req, res) => {
      console.log("🧪 Token decoded user:", req.user); // ADD THIS
   try {
     const result = await db.query(
-      'SELECT id, name, email, suburb FROM application_users WHERE id = $1',
+      'SELECT id, name, email, suburb, is_verified FROM application_users WHERE id = $1',
       [req.user.userId]
     );
     console.log("✅ User fetched from DB:", result.rows[0]); // ADD THIS

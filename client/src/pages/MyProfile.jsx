@@ -112,7 +112,7 @@ const MyProfile = () => {
     localStorage.removeItem('token');
     window.location.href = '/login';
   };
-
+  
   if (!user) return <div className="text-center mt-10 text-gray-600">Loading profile...</div>;
 
   return (
@@ -129,12 +129,13 @@ const MyProfile = () => {
           <button onClick={handleLoadLocalUsers} className="w-full bg-purple-600 text-white py-3 rounded">
             Find People in My Suburb
           </button>
+        {!user.is_verified && (
           <button
             onClick={() => setShowVerificationForm(!showVerificationForm)}
-            className="w-full border border-[#0a2342] text-[#0a2342] py-3 rounded"
-          >
+            className="w-full border border-[#0a2342] text-[#0a2342] py-3 rounded">
             {showVerificationForm ? 'Hide Verification Form' : 'Verify Yourself'}
           </button>
+          )}
           <button onClick={handleLogout} className="w-full border border-gray-400 text-gray-600 py-3 rounded">
             Logout
           </button>
