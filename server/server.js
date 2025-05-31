@@ -8,6 +8,7 @@ import verificationRoutes from './routes/verification.js'; // ✅ Import this co
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import authRoutes from './routes/auth.js';
+import coffeeRoutes from './routes/coffee.js';
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/uploads', express.static(uploadsDir)); // To serve uploaded files
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/verification', verificationRoutes); // ✅ Route correctly registered
+app.use('/api', coffeeRoutes);
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {

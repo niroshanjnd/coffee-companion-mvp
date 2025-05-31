@@ -51,15 +51,15 @@ const MyProfile = () => {
     }
   };
 
-  const handleLoadCoffeeShops = () => {
-    if (!user) return;
-    const dummyShops = [
-      { name: 'The Daily Grind', address: `${user.suburb} Central` },
-      { name: 'Brew Haven', address: `${user.suburb} Plaza` },
-      { name: 'Espresso Corner', address: `${user.suburb} Mall` }
-    ];
-    setCoffeeShops(dummyShops);
-  };
+ const handleLoadCoffeeShops = async () => {
+  try {
+    const res = await axios.get(`http://localhost:5050/api/coffee-shops?suburb=${user.suburb}`);
+    setCoffeeShops(res.data);
+  } catch (error) {
+    console.error('Error fetching coffee shops:', error);
+    alert('Could not load coffee shops. Check API access.');
+  }
+};
 
   const handleUpload = async (e) => {
     e.preventDefault();
