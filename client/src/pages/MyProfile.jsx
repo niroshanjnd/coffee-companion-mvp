@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,11 +6,14 @@ const MyProfile = () => {
   const [user, setUser] = useState(null);
   const [localUsers, setLocalUsers] = useState([]);
   const [coffeeShops, setCoffeeShops] = useState([]);
+  const [showUpload, setShowUpload] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState('');
   const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [profileImage, setProfileImage] = useState(null); // ✅ for preview
 
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!token) {
@@ -112,12 +115,56 @@ const MyProfile = () => {
     localStorage.removeItem('token');
     window.location.href = '/login';
   };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(URL.createObjectURL(file));
+      // TODO: Upload to backend
+    }
+  };
+
+  const openCamera = () => {
+    alert('Webcam feature not implemented yet.');
+    // You can integrate react-webcam or use getUserMedia
+  };
   
   if (!user) return <div className="text-center mt-10 text-gray-600">Loading profile...</div>;
 
   return (
     <div className="min-h-screen bg-[#fefaf6] px-4 py-10 text-[#0a2342]">
       <div className="max-w-3xl mx-auto">
+
+      {/* ✅ Profile Picture Section */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-32 h-32 rounded-full bg-gray-200 border border-gray-300 mb-3 flex items-center justify-center overflow-hidden">
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-gray-400 text-sm">No Photo</span>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <label className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded cursor-pointer">
+              📁 Upload
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                ref={fileInputRef}
+                onChange={handleImageChange}
+              />
+            </label>
+            <button
+              onClick={openCamera}
+              className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded"
+            >
+              📸 Camera
+            </button>
+          </div>
+        </div>
+
         <h2 className="text-2xl font-bold mb-2">Welcome, {user.name}</h2>
         <p className="text-gray-700 mb-2">Suburb: {user.suburb}</p>
         <p className="mb-4">Verification Status: <strong>{verificationStatus}</strong></p>
